@@ -2,7 +2,11 @@ import React, { Component, Fragment } from 'react'
 import Axios from 'axios'
 import List from '../components/common/List'
 import Navbar from '../components/common/Menu'
-import { Container, Header, Grid } from 'semantic-ui-react'
+
+import { Switch, Route, Router } from 'react-router-dom'
+
+import Coins from '../pages/Coins'
+import Assets from '../pages/Assets'
 
 
 export default class App extends Component {
@@ -10,6 +14,7 @@ export default class App extends Component {
   state = {
     data: [],
     wentUp: false,
+    exchanges: []
   }
 
   ws = new WebSocket('wss://ws.coincap.io/prices?assets=ALL')
@@ -43,51 +48,36 @@ export default class App extends Component {
   getData = () => {
     Axios.all([
       Axios.get('https://api.coincap.io/v2/assets?limit=50'),
-      Axios.get('https://shapeshift.io/getcoins')
+      Axios.get('https://shapeshift.io/getcoins'),
+      // Axios.get('https://api.coincap.io/v2/exchanges')
     ])
-      .then(Axios.spread((marketData, coinInfo) => {
-        this.setState({ data: [...marketData.data.data], coinInfo: coinInfo.data })
+      .then(Axios.spread((marketData, coinInfo, exchanges) => {
+        this.setState({
+          data: [...marketData.data.data],
+          coinInfo: coinInfo.data,
+          //  exchanges: exchanges.data.data 
+        })
       }))
   }
 
 
   render() {
+    // console.log(this.state.exchanges)
     return (
-      <Fragment>
-        <div style={{ background: '#ECEFF1' }}>
-          <Navbar />
-          <div style={{ height: '260px', background: 'linear-gradient(to right, rgb(63, 81, 181), rgb(100, 181, 246)) rgb(255, 255, 255)' }}>
-            <Container style={{ padding: '6em 0em 0 0em' }}>
-              <Grid columns={6} centered>
-                <Grid.Row textAlign='justified' style={{ color: 'white' }}>
-                  <Grid.Column>
-                    <h1>Hello</h1>
-                  </Grid.Column>
-                  <Grid.Column>
-                    <h1>Hello</h1>
-                  </Grid.Column>
-                  <Grid.Column>
-                    <h1>Hello</h1>
-                  </Grid.Column>
-                  <Grid.Column>
-                    <h1>Hello</h1>
-                  </Grid.Column>
-                  <Grid.Column>
-                    <h1>Hello</h1>
-                  </Grid.Column>
-                </Grid.Row>
-              </Grid>
-            </Container>
-          </div>
-          <Container style={{ marginTop: '-8em' }}>
-            <List
-              data={this.state.data}
-              coinInfo={this.state.coinInfo}
-              wentUp={this.state.wentUp}
-            />
-          </Container>
-        </div>
-      </Fragment>
+      <Switch>
+        {/* <Route path="/about"> */}
+        {/* <About /> */}
+        {/* </Route> */}
+        <Route exact path="/assets/:id" component={Assets} />
+        <Route exact path="/">
+          <Coins
+            data={this.state.data}
+            coinInfo={this.state.coinInfo}
+            wentUp={this.state.wentUp}
+          />
+        </Route>
+      </Switch>
+
     )
   }
 }
