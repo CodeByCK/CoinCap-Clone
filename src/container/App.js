@@ -21,7 +21,7 @@ export default class App extends Component {
 
   componentDidMount() {
     this.getData()
-    this.webSocket()
+    // this.webSocket()
   }
 
   webSocket = () => {

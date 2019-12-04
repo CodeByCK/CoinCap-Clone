@@ -2,13 +2,14 @@ import React, { Component, Fragment } from 'react'
 import Navbar from '../components/common/Menu'
 import Axios from 'axios'
 import { Container, Header, Grid } from 'semantic-ui-react'
-import { Doughnut } from 'react-chartjs-2';
+import Chart from '../components/common/Chart'
+import numeral from 'numeral'
 
 export default class Assets extends Component {
 
     state = {
         loading: false,
-        interval: 'd1',
+        interval: 'm1',
         graphData: [],
         coinData: []
 
@@ -32,14 +33,22 @@ export default class Assets extends Component {
             }))
     }
 
+    switchTime = (e) => {
+        this.setState({
+            interval: e.target.value
+        }, () => this.fetchCoinData())
+    }
+
+    calculateChange = (data) => {
+        if (data.length > 0 && data) {
+            return numeral((data[data.length - 1].priceUsd - data[0].priceUsd) / data[data.length - 1].priceUsd * 100).format('0.00')
+        }
+        return
+    }
+
     render() {
-        // console.log(this.props.match.params.id);
         const { id } = this.props.match.params
-        console.log(this.state.graphData)
-        // console.log(this.state.coinData.data.maxSupply)
-        // console.log(id)
-
-
+        let changePercentage = this.calculateChange(this.state.graphData)
         return (
             <Fragment>
                 <Navbar />
@@ -47,15 +56,23 @@ export default class Assets extends Component {
                     <div style={{ height: '260px', background: 'linear-gradient(to right, rgb(63, 81, 181), rgb(100, 181, 246)) rgb(255, 255, 255)' }}>
                         <Container style={{ padding: '6em 0em 0 0em' }}>
                             <h1>YOU ARE LOOKING AT {id}</h1>
-                            {/* {this.state.loading && this.state.coinInfo.length === 0
-                                ? <h1>...Loading</h1>
-                                : <h1>{this.state.coinData}</h1>
-                            } */}
-                            <Doughnut data={this.state.graphData.map(x => x)} />
+                            <h1>Change: {changePercentage}</h1>
+                            <Chart
+                                data={this.state.graphData}
+                                change={changePercentage}
 
+                            />
+
+                            <button value="m1" onClick={this.switchTime}>D1</button>
+                            <button value="m5" onClick={this.switchTime}>M5</button>
+                            <button value="m15" onClick={this.switchTime}>M15</button>
+                            <button value="m30" onClick={this.switchTime}>M30</button>
+                            <button value="h1" onClick={this.switchTime}>H1</button>
+                            <button value="h2" onClick={this.switchTime}>H2</button>
                         </Container>
                     </div>
                 </div>
+
             </Fragment>
         )
     }
